@@ -42,6 +42,7 @@ extern "C" {
 #include <libsoup/soup-tld.h>
 #include <libsoup/soup-uri.h>
 #include <libsoup/soup-value-utils.h>
+#include <libsoup/soup-websocket.h>
 #include <libsoup/soup-xmlrpc.h>
 
 #ifdef __cplusplus

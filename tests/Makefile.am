@@ -37,6 +37,7 @@ noinst_PROGRAMS =	\
 	timeout-test	\
 	tld-test	\
 	uri-parsing	\
+	websocket-client	\
 	$(CURL_TESTS)	\
 	$(APACHE_TESTS) \
 	$(XMLRPC_TESTS)
@@ -76,6 +77,7 @@ streaming_test_SOURCES = streaming-test.c $(TEST_SRCS)
 timeout_test_SOURCES = timeout-test.c $(TEST_SRCS)
 tld_test_SOURCES = tld-test.c $(TEST_SRCS)
 uri_parsing_SOURCES = uri-parsing.c $(TEST_SRCS)
+websocket_client_SOURCES = websocket-client-test.c $(TEST_SRCS)
 xmlrpc_test_SOURCES = xmlrpc-test.c $(TEST_SRCS)
 xmlrpc_server_test_SOURCES = xmlrpc-server-test.c $(TEST_SRCS)
 
