@@ -145,7 +145,7 @@ soup_websocket_class_init (SoupWebsocketClass *klass)
                   G_SIGNAL_RUN_FIRST,
                   0,
                   NULL, NULL,
-                  _soup_marshal_NONE__POINTER_UINT,
+                  _soup_marshal_NONE__POINTER_UINT64,
                   G_TYPE_NONE, 2, G_TYPE_POINTER, G_TYPE_UINT64);
 
   /**
@@ -358,12 +358,12 @@ read_payload (SoupWebsocket *socket)
   priv->read_offset += priv->payload_len;
   priv->frame_state = SOUP_WEBSOCKET_FRAME_STATE_IDLE;
 
-  g_message ("OLD read offset = %lu/%lu/%i",
+  g_message ("OLD read offset = %llu/%llu/%i",
              priv->read_offset, priv->write_offset, priv->read_buf->len);
   g_byte_array_remove_range (priv->read_buf, 0, priv->read_offset);
   priv->write_offset -= priv->read_offset;
   priv->read_offset = 0;
-  g_message ("NEW read offset = %lu/%lu/%i",
+  g_message ("NEW read offset = %llu/%llu/%i",
              priv->read_offset, priv->write_offset, priv->read_buf->len);
 
   return TRUE;
