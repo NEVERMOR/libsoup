@@ -179,6 +179,39 @@ soup_websocket_new (void)
 
 /**/
 
+static void
+_soup_websocket_disconnect (SoupWebsocket *socket)
+{
+  SoupWebsocketPrivate *priv = socket->priv;
+
+  g_message ("\tprocessing disconnect");
+
+  if (priv->state == SOUP_WEBSOCKET_STATE_CLOSED)
+    return;
+
+  priv->state = SOUP_WEBSOCKET_STATE_CLOSED;
+
+  if (priv->read_source)
+    {
+      g_source_destroy (priv->read_source);
+      priv->read_source = NULL;
+    }
+  if (priv->write_source)
+    {
+      g_source_destroy (priv->write_source);
+      priv->write_source = NULL;
+    }
+
+  g_clear_object (&priv->istream);
+  priv->ostream = NULL;
+
+  g_clear_object (&priv->connection);
+
+  g_signal_emit (socket, signals[CLOSED], 0);
+}
+
+/**/
+
 static gboolean
 handle_control_frame (SoupWebsocket *socket)
 {
@@ -674,6 +707,7 @@ got_read_data (GIOChannel *source,
       break;
 
     case SOUP_WEBSOCKET_STATE_CLOSED:
+      _soup_websocket_disconnect (socket);
       return G_SOURCE_REMOVE;
     }
 
@@ -755,6 +789,7 @@ got_write_data (GIOChannel *source,
       break;
 
     case SOUP_WEBSOCKET_STATE_CLOSED:
+      _soup_websocket_disconnect (socket);
       return G_SOURCE_REMOVE;
     }
 
@@ -772,7 +807,12 @@ got_connection (SoupConnection *conn, guint status, SoupWebsocket *socket)
 
   g_message ("got connection s=%p status=%i!", socket, status);
 
-  /* TODO: check status */
+  if (status != SOUP_STATUS_OK)
+    {
+      soup_connection_disconnect (priv->connection);
+      _soup_websocket_disconnect (socket);
+      return;
+    }
 
   /* TODO: get the context from the soup connection */
   async_context = g_main_context_default ();
@@ -796,7 +836,11 @@ got_connection (SoupConnection *conn, guint status, SoupWebsocket *socket)
 static void
 got_disconnected (SoupConnection *conn, SoupWebsocket *socket)
 {
+  SoupWebsocketPrivate *priv = socket->priv;
+
   g_message ("DISCONNECTED!!!!!!");
+
+  _soup_websocket_disconnect (socket);
 }
 
 /**/
@@ -997,12 +1041,6 @@ soup_websocket_send_internal (SoupWebsocket *socket, SoupWebsocketMessage *msg)
 {
   return TRUE;
 }
-
-/* void */
-/* soup_websocket_send_string (SoupWebsocket *socket, const gchar *string) */
-/* { */
-
-/* } */
 
 gboolean
 soup_websocket_send (SoupWebsocket *socket, gpointer data, guint length)
